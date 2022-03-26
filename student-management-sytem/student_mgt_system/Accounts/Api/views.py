@@ -18,7 +18,7 @@ from Accounts.Api.serializers import PasswordRestConfirmSerializer, passwordChan
 from student_mgt_app.api.serializers import StudentsSerializers
 from Accounts.Api.serializers import user_creation_serializer
 from Accounts.models import User
-from student_mgt_app.models import Students
+from student_mgt_app.models import Profile
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
@@ -39,7 +39,7 @@ def student_registration(request):
         data = {}
         if serializer.is_valid():
             account = serializer.save()
-            student = Students (
+            profile = Profile (
                 first_name = request.data.get("first_name"),
                 last_name = request.data.get("last_name"),
                 username = request.data.get("username"),
@@ -51,14 +51,11 @@ def student_registration(request):
                 sex = request.data.get("sex"),
                
         )
-            profile_pic = request.FILES['profile_pic']
-            fs = FileSystemStorage()
-            filename = fs.save(profile_pic.name, profile_pic)
-            profile_pic_url = fs.url(filename)
+         
         
-            student.user = account
-            student.save()
-            serializer = StudentsSerializers(student)
+            profile.user = account
+            profile.save()
+            serializer = StudentsSerializers(profile)
             token = Token.objects.get(user=account).key
             data['token'] = token
             data["data"] = serializer.data

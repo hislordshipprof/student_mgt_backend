@@ -10,13 +10,13 @@ from rest_framework.status import (
 )
 
 from Accounts.models import User
-
+from student_mgt_app.models import Profile,SessionYearModel,Courses
 
 class user_creation_serializer(serializers.ModelSerializer):
     email = serializers.EmailField(allow_blank=False)
     password = serializers.CharField(min_length=6, write_only=True, required=False, style={'input_type': 'password'})
     password2 = serializers.CharField(min_length=6, write_only=True, required=False, style={'input_type': 'password'})
-    
+
     class Meta:
         model = User
         fields = ['email',  'password', 'password2', "username"]
@@ -84,11 +84,21 @@ class passwordChangeSerializer(serializers.Serializer):
             return new_password1
 
 
+class SessionYearModalSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=SessionYearModel
+        fields='__all__'
 
 
-# class ProfileSerializer(serializers.ModelSerializer):
-#     # user = user_creation_serializer( read_only=True)
-#     class Meta:
-#         model = Profile
-#         fields = ('user','fname', 'lname', 'isBlackListed', 'status', 'idNumber', "organization",
-#                   'nationality', 'email', 'homeAddress', 'phone')
+class CoursesSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=Courses
+        fields='__all__'
+
+class ProfileSerializer(serializers.ModelSerializer):
+    course_id=CoursesSerializers(many=False,read_only=True)
+    session_year_id=SessionYearModalSerializers(many=False,read_only=True)
+    class Meta:
+        model = Profile
+        fields = ('user','fname', 'lname', 'isBlackListed', 'status', 'idNumber', "organization",
+                  'nationality', 'email', 'homeAddress', 'phone')

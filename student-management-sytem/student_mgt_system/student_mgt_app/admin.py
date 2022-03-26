@@ -4,9 +4,8 @@ from django.contrib import admin
 # Register your models here.
 from .models import *
 
-admin.site.register(Students)
-admin.site.register(AdminHOD)
-admin.site.register(Staffs)
+
+admin.site.register(Profile)
 admin.site.register(Courses)
 admin.site.register(Subjects)
 admin.site.register(Attendance)
