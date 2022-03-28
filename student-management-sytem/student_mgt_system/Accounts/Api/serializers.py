@@ -84,6 +84,7 @@ class passwordChangeSerializer(serializers.Serializer):
             return new_password1
 
 
+
 class SessionYearModalSerializers(serializers.ModelSerializer):
     class Meta:
         model=SessionYearModel
@@ -100,5 +101,4 @@ class ProfileSerializer(serializers.ModelSerializer):
     session_year_id=SessionYearModalSerializers(many=False,read_only=True)
     class Meta:
         model = Profile
-        fields = ('user','fname', 'lname', 'isBlackListed', 'status', 'idNumber', "organization",
-                  'nationality', 'email', 'homeAddress', 'phone')
+        fields = '__all__'

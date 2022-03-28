@@ -15,7 +15,7 @@ from django.core.files.storage import FileSystemStorage
 from Accounts.Api.serializers import PasswordRestConfirmSerializer, passwordChangeSerializer, ProfileSerializer
 # from Reservation.Api.serializers import ReservationSerializer
 # from Reservation.models import Reservation
-from student_mgt_app.api.serializers import StudentsSerializers
+
 from Accounts.Api.serializers import user_creation_serializer
 from Accounts.models import User
 from student_mgt_app.models import Profile
@@ -31,6 +31,41 @@ import random
 def code_generator(size=4, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
+#=========================start of Different user registration====================
+@api_view(['POST'])
+def admin_registration(request):
+    if request.method == "POST":
+        serializer = user_creation_serializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            account = serializer.save()
+            account.is_staff = True
+            account.is_student = True
+            account.save()
+            profile = Profile (
+                first_name = request.data.get("first_name"),
+                last_name = request.data.get("last_name"),
+                username = request.data.get("username"),
+                email = request.data.get("email"),
+                address = request.data.get("address"),
+                sex = request.data.get("sex"),
+                profile_pic=request.data.get("profile_pic"),
+                created_at=request.data.get("created_at"),
+                updated_at=request.date.get("updated_at"),
+                objects=request.data.get("objects"),
+                idNumber="LCS" + code_generator()
+   )
+         
+            profile.user = account
+            profile.save()
+            serializer = ProfileSerializer(profile)
+            token = Token.objects.get(user=account).key
+            data['token'] = token
+            data["data"] = serializer.data
+        else:
+            data = serializer.errors
+        return Response(data)
+
 
 @api_view(['POST'])
 def student_registration(request):
@@ -44,18 +79,23 @@ def student_registration(request):
                 last_name = request.data.get("last_name"),
                 username = request.data.get("username"),
                 email = request.data.get("email"),
-                password = request.data.get("password"),
                 address = request.data.get("address"),
                 session_year_id = request.data.get("session_year"),
                 course_id = request.data.get("course"),
                 sex = request.data.get("sex"),
+                profile_pic=request.data.get("profile_pic"),
+                created_at=request.data.get("created_at"),
+                updated_at=request.date.get("updated_at"),
+                fcm_token=request.data.get("fcm_token"),
+                objects=request.data.get("objects"),
+
                
         )
          
         
             profile.user = account
             profile.save()
-            serializer = StudentsSerializers(profile)
+            serializer = ProfileSerializer(profile)
             token = Token.objects.get(user=account).key
             data['token'] = token
             data["data"] = serializer.data
@@ -64,37 +104,38 @@ def student_registration(request):
         return Response(data)
 
 
-# Manager Registration
-
-# @api_view(['POST'])
-# def manager_registration(request):
-#     if request.method == "POST":
-#         serializer = user_creation_serializer(data=request.data)
-#         data = {}
-#         if serializer.is_valid():
-#             account = serializer.save()
-#             account.is_manager = True
-#             account.is_staff = True
-#             account.save()
-#             profile = Profile(
-#                 fname=request.data.get("fname"),
-#                 nationality=request.data.get("nationality"),
-#                 lname=request.data.get("lname"),
-#                 organization=request.data.get("organization"),
-#                 email=request.data.get("email"),
-#                 homeAddress=request.data.get("address"),
-#                 phone=request.data.get("phone"),
-#                 idNumber="LCS" + code_generator()
-#             )
-#             profile.user = account
-#             profile.save()
-#             serializer = ProfileSerializer(profile)
-#             token = Token.objects.get(user=account).key
-#             data['token'] = token
-#             data["data"] = serializer.data
-#         else:
-#             data = serializer.errors
-#         return Response(data)
+@api_view(['POST'])
+def staff_registration(request):
+    if request.method == "POST":
+        serializer = user_creation_serializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            account = serializer.save()
+            profile = Profile (
+                first_name = request.data.get("first_name"),
+                last_name = request.data.get("last_name"),
+                username = request.data.get("username"),
+                email = request.data.get("email"),
+                address = request.data.get("address"),
+                sex = request.data.get("sex"),
+                profile_pic=request.data.get(""),
+                created_at=request.data.get("created_at"),
+                updated_at=request.date.get("updated_at"),
+                fcm_token=request.data.get("fcm_token"),
+                objects=request.data.get("objects"),
+               
+        )
+         
+        
+            profile.user = account
+            profile.save()
+            serializer = ProfileSerializer(profile)
+            token = Token.objects.get(user=account).key
+            data['token'] = token
+            data["data"] = serializer.data
+        else:
+            data = serializer.errors
+        return Response(data)
 
 
 # # ##################################### end of registration ####################################
@@ -122,27 +163,83 @@ def student_registration(request):
 #         return Response(data, status=HTTP_200_OK)
 
 
-# @api_view(['Post', ])
-# def admin_login(request):
-#     email = request.data.get("email")
-#     password = request.data.get("password")
-#     if email is None or password is None:
-#         return Response({'error': 'Please provide both username and password'}, status=HTTP_400_BAD_REQUEST)
-#     user = authenticate(request, email=email, password=password)
-#     if user.is_staff or user.is_admin:
-#         data = {}
-#         profile = Profile.objects.get(user=user)
-#         if not profile:
-#             token = Token.objects.get(user=user).key
-#             data['token'] = token
-#         else:
-#             serializer = ProfileSerializer(profile)
-#             data["data"] = serializer.data
-#             token = Token.objects.get(user=user).key
-#             data['token'] = token
-#         return Response(data, status=HTTP_200_OK)
+@api_view(['Post'])
+def admin_login(request):
+    email = request.data.get("email")
+    password = request.data.get("password")
+    if email is None or password is None:
+        return Response({'error': 'Please provide both username and password'}, status=HTTP_400_BAD_REQUEST)
+    user = authenticate(request, email=email, password=password)
+    if user.is_staff or user.is_admin:
+        data = {}
+        profile = Profile.objects.get(user=user)
+        if not profile:
+            token = Token.objects.get(user=user).key
+            data['token'] = token
+        else:
+            serializer = ProfileSerializer(profile)
+            data["data"] = serializer.data
+            token = Token.objects.get(user=user).key
+            data['token'] = token
+        return Response(data, status=HTTP_200_OK)
+    else:
+        return Response({'error': 'Invalid Credentials'}, status=HTTP_404_NOT_FOUND)
+
+
+
+
+
+# ==================user profile view====================================
+
+@api_view(['PATCH', 'GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    if request.method == 'GET':
+        data = {}
+        profile = Profile.objects.filter(user=request.user)
+        if profile:
+            serializer = ProfileSerializer(profile, many=True)
+            data["data"] = serializer.data
+        else:
+            data["error"] = "the data is invalid"
+        return Response(data)
+    else:
+        profile = Profile.objects.get(user=request.user)
+        serializer = ProfileSerializer(profile, request.data, partial=True)
+        data = {}
+        if serializer.is_valid():
+            serializer.save()
+
+            data["data"] = serializer.data
+        else:
+            data["failure"] = "we could not update your info due to some errors"
+
+        return Response(data)
+
+
+# @api_view(['DELETE'])
+# @authentication_classes([TokenAuthentication, ])
+# @permission_classes([IsAuthenticated])
+# def delete_staff(request, username):
+#     try:
+#         staff = User.objects.get(username=username)
+#         print(staff)
+#     except User.DoesNotExist:
+#         return Response({'error': 'The Query you want to delete does not exist'}, status=status.HTTP_404_NOT_FOUND)
+#     data = {}
+#     delete_operation = staff.delete()
+#     if delete_operation:
+#         data["success"] = "successfully deleted"
 #     else:
-#         return Response({'error': 'Invalid Credentials'}, status=HTTP_404_NOT_FOUND)
+#         data["failure"] = "unable to delete"
+#     return Response(data=data)
+
+
+
+
+
+
 
 
 # # #####################password reset view############################################
@@ -253,48 +350,3 @@ def student_registration(request):
 #     else:
 #         data = serializer.error
 #     return Response(data)
-
-
-# # user profile view
-# @api_view(['PATCH', 'GET'])
-# @authentication_classes([TokenAuthentication, ])
-# @permission_classes([IsAuthenticated])
-# def profile(request):
-#     if request.method == 'GET':
-#         data = {}
-#         profile = Profile.objects.filter(user=request.user)
-#         if profile:
-#             serializer = ProfileSerializer(profile, many=True)
-#             data["data"] = serializer.data
-#         else:
-#             data["error"] = "the data is invalid"
-#         return Response(data)
-#     else:
-#         profile = Profile.objects.get(user=request.user)
-#         serializer = ProfileSerializer(profile, request.data, partial=True)
-#         data = {}
-#         if serializer.is_valid():
-#             serializer.save()
-
-#             data["data"] = serializer.data
-#         else:
-#             data["failure"] = "we could not update your info due to some errors"
-
-#         return Response(data)
-
-# @api_view(['DELETE'])
-# @authentication_classes([TokenAuthentication, ])
-# @permission_classes([IsAuthenticated])
-# def delete_staff(request, username):
-#     try:
-#         staff = User.objects.get(username=username)
-#         print(staff)
-#     except User.DoesNotExist:
-#         return Response({'error': 'The Query you want to delete does not exist'}, status=status.HTTP_404_NOT_FOUND)
-#     data = {}
-#     delete_operation = staff.delete()
-#     if delete_operation:
-#         data["success"] = "successfully deleted"
-#     else:
-#         data["failure"] = "unable to delete"
-#     return Response(data=data)
