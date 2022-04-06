@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('api/',include('student_mgt_api.api.urls')),
     path('Api/',include('Accounts.Api.urls')),
+    path("api/",include('student_mgt_app.api.urls')),
     
     # path('api/',include('api.urls')),
 

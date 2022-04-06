@@ -1,3 +1,5 @@
+import profile
+from re import T
 from django.conf import settings
 # from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -11,27 +13,29 @@ class SessionYearModel(models.Model):
     object=models.Manager()
 
 
-# class AdminHOD(models.Model):
-#     id=models.AutoField(primary_key=True)
-#     admin=models.OneToOneField(User,on_delete=models.CASCADE)
-#     created_at=models.DateTimeField(auto_now_add=True)
-#     updated_at=models.DateTimeField(auto_now_add=True)
-#     objects=models.Manager()
+class AdminHOD(models.Model):
+    id=models.AutoField(primary_key=True)
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now_add=True)
+    objects=models.Manager()
 
-#     def __str__(self):
-#         return self.admin.username
+    def __str__(self):
+        return self.user
 
-# class Staffs(models.Model):
-#     id=models.AutoField(primary_key=True)
-#     admin=models.OneToOneField(User,on_delete=models.CASCADE)
-#     address=models.TextField()
-#     created_at=models.DateTimeField(auto_now_add=True)
-#     updated_at=models.DateTimeField(auto_now_add=True)
-#     fcm_token=models.TextField(default="")
-#     objects=models.Manager()
+class Staffs(models.Model):
+    id=models.AutoField(primary_key=True)
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
+    address=models.TextField(null=True,blank=True,)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now_add=True)
+    fcm_token=models.TextField(default="")
+    objects=models.Manager()
 
-#     def __str__(self):
-#         return self.admin.username
+    def __str__(self):
+        return self.user
+
+
 
 class Courses(models.Model):
     id=models.AutoField(primary_key=True)
@@ -42,9 +46,6 @@ class Courses(models.Model):
 
     def __str__(self):
         return self.course_name
-
-    class Meta:
-        verbose_name_plural="Courses"    
 
 
 class Subjects(models.Model):
@@ -59,48 +60,23 @@ class Subjects(models.Model):
     def __str__(self):
         return self.subject_name
 
-    class Meta:
-        verbose_name_plural="Subjects"    
-
-# class Students(models.Model):
-#     id=models.AutoField(primary_key=True)
-#     admin=models.OneToOneField(User,on_delete=models.CASCADE)
-#     gender=models.CharField(max_length=255)
-#     profile_pic=models.FileField(null=True,blank=True,default='/placeholder.png')
-#     address=models.TextField()
-#     course_id=models.ForeignKey(Courses,on_delete=models.DO_NOTHING)
-#     session_year_id=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE)
-#     created_at=models.DateTimeField(auto_now_add=True)
-#     updated_at=models.DateTimeField(auto_now_add=True)
-#     fcm_token=models.TextField(default="")
-#     objects = models.Manager()
-
-#     def __str__(self):
-#         return self.admin.username
-
-# #     class Meta:
-#         verbose_name_plural="Students"    
-
-class Profile(models.Model):
+class Students(models.Model):
     id=models.AutoField(primary_key=True)
-    user=models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
-    gender=models.CharField(max_length=255)
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=50,blank=True, null=True)
+    last_name = models.CharField(max_length=50,blank=True, null=True)
+    gender=models.CharField(max_length=255,null=True,blank=True,)
     profile_pic=models.FileField(null=True,blank=True,default='/placeholder.png')
-    address=models.TextField()
-    course_id=models.ForeignKey(Courses,on_delete=models.DO_NOTHING,blank=True, null=True)
-    session_year_id=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE,blank=True, null=True)
+    address=models.TextField(null=True,blank=True,)
+    course_id=models.ForeignKey(Courses,on_delete=models.DO_NOTHING,null=True,blank=True,)
+    session_year_id=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE,null=True,blank=True,)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now_add=True)
-    fcm_token=models.TextField(default="",blank=True, null=True)
+    fcm_token=models.TextField(default="")
     objects = models.Manager()
 
     def __str__(self):
         return self.user.username
-
-    class Meta:
-        verbose_name_plural="Profile"   
-
-
 
 class Attendance(models.Model):
     id=models.AutoField(primary_key=True)
@@ -111,9 +87,9 @@ class Attendance(models.Model):
     updated_at=models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
 
-class Attendance_Report(models.Model):
+class AttendanceReport(models.Model):
     id=models.AutoField(primary_key=True)
-    student_id=models.ForeignKey(Profile,on_delete=models.DO_NOTHING)
+    student_id=models.ForeignKey(Students,on_delete=models.DO_NOTHING)
     attendance_id=models.ForeignKey(Attendance,on_delete=models.CASCADE)
     status=models.BooleanField(default=False)
     created_at=models.DateTimeField(auto_now_add=True)
@@ -122,7 +98,7 @@ class Attendance_Report(models.Model):
 
 class LeaveReportStudent(models.Model):
     id=models.AutoField(primary_key=True)
-    student_id=models.ForeignKey(Profile,on_delete=models.CASCADE)
+    student_id=models.ForeignKey(Students,on_delete=models.CASCADE)
     leave_date=models.CharField(max_length=255)
     leave_message=models.TextField()
     leave_status=models.IntegerField(default=0)
@@ -132,7 +108,7 @@ class LeaveReportStudent(models.Model):
 
 class LeaveReportStaff(models.Model):
     id = models.AutoField(primary_key=True)
-    staff_id = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    staff_id = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     leave_date = models.CharField(max_length=255)
     leave_message = models.TextField()
     leave_status = models.IntegerField(default=0)
@@ -143,7 +119,7 @@ class LeaveReportStaff(models.Model):
 
 class FeedBackStudent(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE)
     feedback = models.TextField()
     feedback_reply = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -153,7 +129,7 @@ class FeedBackStudent(models.Model):
 
 class FeedBackStaff(models.Model):
     id = models.AutoField(primary_key=True)
-    staff_id = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    staff_id = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     feedback = models.TextField()
     feedback_reply=models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -163,7 +139,7 @@ class FeedBackStaff(models.Model):
 
 class NotificationStudent(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
@@ -172,7 +148,7 @@ class NotificationStudent(models.Model):
 
 class NotificationStaff(models.Model):
     id = models.AutoField(primary_key=True)
-    staff_id = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    staff_id = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
@@ -180,7 +156,7 @@ class NotificationStaff(models.Model):
 
 class StudentResult(models.Model):
     id=models.AutoField(primary_key=True)
-    student_id=models.ForeignKey(Profile,on_delete=models.CASCADE)
+    student_id=models.ForeignKey(Students,on_delete=models.CASCADE)
     subject_id=models.ForeignKey(Subjects,on_delete=models.CASCADE)
     subject_exam_marks=models.FloatField(default=0)
     subject_assignment_marks=models.FloatField(default=0)
@@ -194,13 +170,15 @@ class OnlineClassRoom(models.Model):
     room_pwd=models.CharField(max_length=255)
     subject=models.ForeignKey(Subjects,on_delete=models.CASCADE)
     session_years=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE)
-    started_by=models.ForeignKey(Profile,on_delete=models.CASCADE)
+    started_by=models.ForeignKey(Staffs,on_delete=models.CASCADE)
     is_active=models.BooleanField(default=True)
     created_on=models.DateTimeField(auto_now_add=True)
     objects=models.Manager()
 
+    def __str__(self):
+        return self.room_name
 
-# @receiver(post_save,sender=User)
+# @receiver(post_save,sender=CustomUser)
 # def create_user_profile(sender,instance,created,**kwargs):
 #     if created:
 #         if instance.user_type==1:
@@ -210,7 +188,7 @@ class OnlineClassRoom(models.Model):
 #         if instance.user_type==3:
 #             Students.objects.create(admin=instance,course_id=Courses.objects.get(id=1),session_year_id=SessionYearModel.object.get(id=1),address="",profile_pic="",gender="")
 
-# @receiver(post_save,sender=User)
+# @receiver(post_save,sender=CustomUser)
 # def save_user_profile(sender,instance,**kwargs):
 #     if instance.user_type==1:
 #         instance.adminhod.save()
@@ -218,7 +196,4 @@ class OnlineClassRoom(models.Model):
 #         instance.staffs.save()
 #     if instance.user_type==3:
 #         instance.students.save()
-# @receiver(post_save,sender=settings.AUTH_USER_MODEL)
-# def create_auth_token(sender,instance=None,created=False,**kwargs):
-#     if created:
-#         Token.objects.create(user=instance)
+

@@ -8,7 +8,11 @@ urlpatterns = [
     path('staffsignup/',views.staff_registration),  
 
 #====================admin login=========================================
-    path('admin_login/',views.admin_login), 
-    path('profile/',views.profile), 
-    path('profiles/',views.profiles), 
+    # path('admin_login/',views.admin_login), 
+    # path('Studentprofile/',views.admin_login), 
+    # path('login/',views.login_view), 
+
+    path('Studentprofile/',views.Studentprofile), 
+    # path('createStudent/',views.createStudent), 
+    
 ]

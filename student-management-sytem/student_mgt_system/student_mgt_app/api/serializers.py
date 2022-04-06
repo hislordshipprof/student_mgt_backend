@@ -1,77 +1,86 @@
 
+from dataclasses import field
 from rest_framework import serializers
-from student_mgt_app.models import NotificationStaff,Courses,Subjects,Attendance,Attendance_Report,LeaveReportStudent,LeaveReportStaff,FeedBackStudent,FeedBackStaff,NotificationStudent
+from student_mgt_app.models import *
 
+class SessionYearModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=SessionYearModel
+        fields="__all__"
 
-
-class CoursesSerializers(serializers.ModelSerializer):
+class CoursesSerializer(serializers.ModelSerializer):
     class Meta:
         model=Courses
         fields='__all__'
 
-# class StudentsSerializers(serializers.ModelSerializer):
-#     course_id=CoursesSerializers(many=False,read_only=True)
+class StudentsSerializer(serializers.ModelSerializer):
+    course_id=CoursesSerializer(many=False,read_only=True)
  
-#     class Meta:
-#         model =Students
-#         fields='__all__'
+    class Meta:
+        model =Students
+        fields='__all__'
 
 
-# class AdminHodSerializers(serializers.ModelSerializer):
-#      class Meta:
-#          model=AdminHOD
-#          fields='__all__'       
+class AdminHodSerializer(serializers.ModelSerializer):
+     class Meta:
+         model=AdminHOD
+         fields='__all__'       
 
-# class StaffsSerializers(serializers.ModelSerializer):
-#     class Meta:
-#         model=Staffs
-#         fields='__all__'
+class StaffsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Staffs
+        fields='__all__'
 
-class SubjectsSerializers(serializers.ModelSerializer):
-    course_id=CoursesSerializers()
+class SubjectsSerializer(serializers.ModelSerializer):
+    course_id=CoursesSerializer()
     class Meta:
         model=Subjects
         fields='__all__'
 
-class AttendanceSerializers(serializers.ModelSerializer):
+class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model=Attendance
         fields='__all__'    
 
-class Attendance_ReportSerializers(serializers.ModelSerializer):
-    attendance_id=AttendanceSerializers()
+class AttendanceReportSerializer(serializers.ModelSerializer):
+    attendance_id=AttendanceSerializer(many=False,read_only=True)
     class Meta:
-        model=Attendance_Report
+        model=AttendanceReport
         fields='__all__'
 
-class LeaveReportStudentSerializers(serializers.ModelSerializer):
+class LeaveReportStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model=LeaveReportStudent
         fields='__all__'        
 
-class LeaveReportStaffSerializers(serializers.ModelSerializer):
+class LeaveReportStaffSerializer(serializers.ModelSerializer):
     class Meta:
         model=LeaveReportStaff
         fields='__all__'
 
-class FeedBackStudentSerializers(serializers.ModelSerializer):
+class FeedBackStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model=FeedBackStudent
         fields='__all__'
 
 
-class FeedBackStaffSerializers(serializers.ModelSerializer):
+class FeedBackStaffSerializer(serializers.ModelSerializer):
     class Meta:
         model=FeedBackStaff
         fields='__all__'       
 
 
-class NotificationStudentSerializers(serializers.ModelSerializer):
+class NotificationStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model=NotificationStudent
         fields='__all__'
 
-class NotificationStaffSerializers(serializers.ModelSerializer):
+class NotificationStaffSerializer(serializers.ModelSerializer):
     class Meta:
         model=NotificationStaff
+        fields='__all__'
+
+class OnlineClassRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=OnlineClassRoom
         fields='__all__'

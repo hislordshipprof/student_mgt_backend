@@ -10,7 +10,7 @@ from rest_framework.status import (
 )
 
 from Accounts.models import User
-from student_mgt_app.models import Profile,SessionYearModel,Courses
+# from student_mgt_app.models import Profile
 
 class user_creation_serializer(serializers.ModelSerializer):
     email = serializers.EmailField(allow_blank=False)
@@ -85,20 +85,20 @@ class passwordChangeSerializer(serializers.Serializer):
 
 
 
-class SessionYearModalSerializers(serializers.ModelSerializer):
-    class Meta:
-        model=SessionYearModel
-        fields='__all__'
+# class SessionYearModalSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model=SessionYearModel
+#         fields='__all__'
 
 
-class CoursesSerializers(serializers.ModelSerializer):
-    class Meta:
-        model=Courses
-        fields='__all__'
+# class CoursesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model=Courses
+#         fields='__all__'
 
-class ProfileSerializer(serializers.ModelSerializer):
-    course_id=CoursesSerializers(many=False,read_only=True)
-    session_year_id=SessionYearModalSerializers(many=False,read_only=True)
-    class Meta:
-        model = Profile
-        fields = '__all__'
+# class ProfileSerializer(serializers.ModelSerializer):
+#     # course_id=CoursesSerializer(many=False,read_only=True)
+#     # session_year_id=SessionYearModalSerializer(many=False,read_only=True)
+#     class Meta:
+#         model = Profile
+#         fields = '__all__'

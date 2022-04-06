@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.forms import ValidationError
@@ -12,13 +13,14 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate, login
 from django.core.files.storage import FileSystemStorage
 
-from Accounts.Api.serializers import PasswordRestConfirmSerializer, passwordChangeSerializer, ProfileSerializer
+from Accounts.Api.serializers import PasswordRestConfirmSerializer, passwordChangeSerializer
 # from Reservation.Api.serializers import ReservationSerializer
 # from Reservation.models import Reservation
-
+from .serializers import *
+from student_mgt_app.api.serializers import *
 from Accounts.Api.serializers import user_creation_serializer
 from Accounts.models import User
-from student_mgt_app.models import Profile
+from student_mgt_app.models import *
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
@@ -41,24 +43,18 @@ def admin_registration(request):
             account = serializer.save()
             account.is_staff = True
             account.is_student = True
+            account.is_admin=True
             account.save()
-            profile = Profile (
-                first_name = request.data.get("first_name"),
-                last_name = request.data.get("last_name"),
-                username = request.data.get("username"),
-                email = request.data.get("email"),
-                address = request.data.get("address"),
-                sex = request.data.get("sex"),
-                profile_pic=request.data.get("profile_pic"),
+            admin = AdminHOD (
+                id = request.data.get("id"),
                 created_at=request.data.get("created_at"),
-                updated_at=request.date.get("updated_at"),
-                objects=request.data.get("objects"),
-                idNumber="LCS" + code_generator()
+                updated_at=request.data.get("updated_at"),
+            
    )
          
-            profile.user = account
-            profile.save()
-            serializer = ProfileSerializer(profile)
+            admin.user = account
+            admin.save()
+            serializer = AdminHodSerializer(admin)
             token = Token.objects.get(user=account).key
             data['token'] = token
             data["data"] = serializer.data
@@ -74,28 +70,28 @@ def student_registration(request):
         data = {}
         if serializer.is_valid():
             account = serializer.save()
-            profile = Profile (
-                first_name = request.data.get("first_name"),
-                last_name = request.data.get("last_name"),
-                username = request.data.get("username"),
-                email = request.data.get("email"),
+            account.is_student = True
+            account.save()
+            student = Students (
+                first_name=request.data.get("first_name"),
+                last_name=request.data.get("last_name"),
+                gender=request.data.get("gender"),
                 address = request.data.get("address"),
-                session_year_id = request.data.get("session_year"),
-                course_id = request.data.get("course"),
-                sex = request.data.get("sex"),
+                # session_year_id = request.data.get("session_year"),
+                course_id =request.data.get("course"),
                 profile_pic=request.data.get("profile_pic"),
                 created_at=request.data.get("created_at"),
-                updated_at=request.date.get("updated_at"),
+                updated_at=request.data.get("updated_at"),
                 fcm_token=request.data.get("fcm_token"),
-                objects=request.data.get("objects"),
+               
 
                
         )
          
-        
-            profile.user = account
-            profile.save()
-            serializer = ProfileSerializer(profile)
+            student.user = account
+            student.save()
+            serializer = StudentsSerializer(student)
+            
             token = Token.objects.get(user=account).key
             data['token'] = token
             data["data"] = serializer.data
@@ -111,25 +107,22 @@ def staff_registration(request):
         data = {}
         if serializer.is_valid():
             account = serializer.save()
-            profile = Profile (
-                first_name = request.data.get("first_name"),
-                last_name = request.data.get("last_name"),
-                username = request.data.get("username"),
-                email = request.data.get("email"),
+            account.is_staff = True
+            account.save()
+            staff = Staffs (
+            
                 address = request.data.get("address"),
-                sex = request.data.get("sex"),
-                profile_pic=request.data.get(""),
                 created_at=request.data.get("created_at"),
-                updated_at=request.date.get("updated_at"),
+                updated_at=request.data.get("updated_at"),
                 fcm_token=request.data.get("fcm_token"),
-                objects=request.data.get("objects"),
+            
                
         )
          
         
-            profile.user = account
-            profile.save()
-            serializer = ProfileSerializer(profile)
+            staff.user = account
+            staff.save()
+            serializer = StaffsSerializer(staff)
             token = Token.objects.get(user=account).key
             data['token'] = token
             data["data"] = serializer.data
@@ -153,40 +146,40 @@ def staff_registration(request):
 #     else:
 #         login(request, user)
 #         data = {}
-#         serializer = ProfileSerializer(Profile.objects.get(user=user))
-#         reservations = Reservation.objects.filter(guest__user__username=user)
+#         serializer = StudentsSerializer(Students.objects.get(user=user))
+#         student = Students.objects.filter(guest__user__username=user)
 #         token, _ = Token.objects.get_or_create(user=user)
 #         data['token'] = token.key
 #         data["data"] = serializer.data
-#         if reservations:
-#             data["reservations"] = ReservationSerializer(reservations, many=True).data
+#         if student:
+#             data["student"] = StudentsSerializer(student, many=True).data
 #         return Response(data, status=HTTP_200_OK)
 
 
-@api_view(['Post'])
-def admin_login(request):
-    email = request.data.get("email")
-    password = request.data.get("password")
-    if email is None or password is None:
-        return Response({'error': 'Please provide both username and password'}, status=HTTP_400_BAD_REQUEST)
-    user = authenticate(request, email=email, password=password)
-    if user.is_staff or user.is_admin:
-        data = {}
-        profile = Profile.objects.get(user=user)
-        if not profile:
-            token = Token.objects.get(user=user).key
-            data['token'] = token
-        else:
-            serializer = ProfileSerializer(profile)
-            data["data"] = serializer.data
-            token = Token.objects.get(user=user).key
-            data['token'] = token
-        return Response(data, status=HTTP_200_OK)
-    else:
-        return Response({'error': 'Invalid Credentials'}, status=HTTP_404_NOT_FOUND)
+# @api_view(['Post'])
+# def admin_login(request):
+#     email = request.data.get("email")
+#     password = request.data.get("password")
+#     if email is None or password is None:
+#         return Response({'error': 'Please provide both username and password'}, status=HTTP_400_BAD_REQUEST)
+#     user = authenticate(request, email=email, password=password)
+#     if user.is_staff or user.is_admin or user.is_admin:
+#         data = {}
+#         admin = AdminHOD.objects.get(user=user)
+#         if not admin:
+#             token = Token.objects.get(user=user).key
+#             data['token'] = token
+#         else:
+#             serializer = AdminHodSerializer(admin)
+#             data["data"] = serializer.data
+#             token = Token.objects.get(user=user).key
+#             data['token'] = token
+#         return Response(data, status=HTTP_200_OK)
+#     else:
+#         return Response({'error': 'Invalid Credentials'}, status=HTTP_404_NOT_FOUND)
 
 
-
+# # # 
 
 
 # ==================user profile view====================================
@@ -194,19 +187,19 @@ def admin_login(request):
 @api_view(['PATCH', 'GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def profile(request):
+def Studentprofile(request):
     if request.method == 'GET':
         data = {}
-        profile = Profile.objects.filter(user=request.user)
+        profile = Students.objects.filter(user=request.user)
         if profile:
-            serializer = ProfileSerializer(profile, many=True)
+            serializer = StudentsSerializer(profile, many=True)
             data["data"] = serializer.data
         else:
             data["error"] = "the data is invalid"
         return Response(data)
     else:
-        profile = Profile.objects.get(user=request.user)
-        serializer = ProfileSerializer(profile, request.data, partial=True)
+        profile = Students.objects.get(user=request.user)
+        serializer = StudentsSerializer(profile, request.data, partial=True)
         data = {}
         if serializer.is_valid():
             serializer.save()
