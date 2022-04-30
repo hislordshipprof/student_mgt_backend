@@ -1,68 +1,143 @@
 import json
 
-import requests
+# import requests
 from django.contrib import messages
-from django.contrib.auth.models import User
+from Accounts.models import User
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from student_mgt_app.models import Students,Staffs,Courses,Subjects,Attendance,AttendanceReport
+from student_mgt_app.api.serializers import *
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from Accounts.Api.serializers import user_creation_serializer
 
-from student_mgt_app.models import *
-
-
-
-
+@api_view (['GET', ])
 def admin_home(request):
     student_count1=Students.objects.all().count()
     staff_count=Staffs.objects.all().count()
     subject_count=Subjects.objects.all().count()
     course_count=Courses.objects.all().count()
+    subjects=serialize(Subjects.objects.all())
+    courses=serialize(Courses.objects.all())
+    all_students=serialize(Students.objects.all()) 
+    all_staff=serialize(Staffs.objects.all()) 
+    all_attendance_report=serialize(AttendanceReport.objects.all())
+    all_attendance=serialize(Attendance.objects.all())
+    LeaveReportStudents=serialize(LeaveReportStudent.objects.all())
+   
+    data={}
+    data['student_count1']=student_count1
+    data['staff_count']=staff_count
+    data['subject_count']=subject_count
+    data['course_count']=course_count
+ 
+    data['courses']=courses
+    data['subjects']=subjects
+    data['all_students']=all_students
+    data['all_attendance_report']=all_attendance_report
+    data['all_attendance']=all_attendance
+    data['LeaveReportStudents']=LeaveReportStudents
+   
+    data['all_staff']=all_staff
 
-    course_all=Courses.objects.all()
-    course_name_list=[]
-    subject_count_list=[]
-    student_count_list_in_course=[]
-    for course in course_all:
-        subjects=Subjects.objects.filter(course_id=course.id).count()
-        students=Students.objects.filter(course_id=course.id).count()
-        course_name_list.append(course.course_name)
-        subject_count_list.append(subjects)
-        student_count_list_in_course.append(students)
-
-    subjects_all=Subjects.objects.all()
-    subject_list=[]
-    student_count_list_in_subject=[]
-    for subject in subjects_all:
-        course=Courses.objects.get(id=subject.course_id.id)
-        student_count=Students.objects.filter(course_id=course.id).count()
-        subject_list.append(subject.subject_name)
-        student_count_list_in_subject.append(student_count)
-
-    staffs=Staffs.objects.all()
-    attendance_present_list_staff=[]
-    attendance_absent_list_staff=[]
-    staff_name_list=[]
-    for staff in staffs:
-        subject_ids=Subjects.objects.filter(staff_id=staff.admin.id)
-        attendance=Attendance.objects.filter(subject_id__in=subject_ids).count()
-        leaves=LeaveReportStaff.objects.filter(staff_id=staff.id,leave_status=1).count()
-        attendance_present_list_staff.append(attendance)
-        attendance_absent_list_staff.append(leaves)
-        staff_name_list.append(staff.admin.username)
-
-    students_all=Students.objects.all()
-    attendance_present_list_student=[]
-    attendance_absent_list_student=[]
-    student_name_list=[]
-    for student in students_all:
-        attendance=AttendanceReport.objects.filter(student_id=student.id,status=True).count()
-        absent=AttendanceReport.objects.filter(student_id=student.id,status=False).count()
-        leaves=LeaveReportStudent.objects.filter(student_id=student.id,leave_status=1).count()
-        attendance_present_list_student.append(attendance)
-        attendance_absent_list_student.append(leaves+absent)
-        student_name_list.append(student.admin.username)
+    return Response(data)
+ 
 
 
-    return render(request,"hod_template/home_content.html",{"student_count":student_count1,"staff_count":staff_count,"subject_count":subject_count,"course_count":course_count,"course_name_list":course_name_list,"subject_count_list":subject_count_list,"student_count_list_in_course":student_count_list_in_course,"student_count_list_in_subject":student_count_list_in_subject,"subject_list":subject_list,"staff_name_list":staff_name_list,"attendance_present_list_staff":attendance_present_list_staff,"attendance_absent_list_staff":attendance_absent_list_staff,"student_name_list":student_name_list,"attendance_present_list_student":attendance_present_list_student,"attendance_absent_list_student":attendance_absent_list_student})
+@api_view(['POST'])
+def add_staff_save(request):
+    if request.method == "POST":
+        serializer = user_creation_serializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            account = serializer.save()
+            account.is_staff = True
+            account.save()
+            staff = Staffs (
+                first_name=request.data.get("first_name"),
+                last_name=request.data.get("last_name"),
+                address = request.data.get("address"),
+               
+        )
+         
+        
+            staff.user = account
+            staff.save()
+            serializer = StaffsSerializer(staff)
+            token = Token.objects.get(user=account).key
+            data['token'] = token
+            data["data"] = serializer.data
+        else:
+            data = serializer.errors
+        return Response(data)
+
+
+
+@api_view(['POST'])
+def add_course_save(request):
+    if request.method == 'POST':
+        course=Courses.objects.create(
+            course_name="name"
+        )
+        serializer = CoursesSerializer(course,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def add_student_save(request):
+    if request.method == "POST":
+        serializer = user_creation_serializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            account = serializer.save()
+            account.is_student = True
+            account.save()
+            student = Students (
+                first_name=request.data.get("first_name"),
+                last_name=request.data.get("last_name"),
+                gender=request.data.get("gender"),
+                address = request.data.get("address"),
+                session_year_id = request.data.get("session_year"),
+                course_id =request.data.get("course"),
+                profile_pic=request.data.get("profile_pic"),
+               
+        )
+         
+            student.user = account
+            student.save()
+            serializer = StudentsSerializer(student)
+            
+            token = Token.objects.get(user=account).key
+            data['token'] = token
+            data["data"] = serializer.data
+        else:
+            data = serializer.errors
+        return Response(data)
+
+@api_view(['POST'])
+def add_subject_save(request):
+    if request.method!="POST":
+        return HttpResponse("<h2>Method Not Allowed</h2>")
+    else:
+        subject_name=request.POST.get("subject_name")
+        course_id=request.POST.get("course")
+        course=Courses.objects.get(id=course_id)
+        staff_id=request.POST.get("staff")
+        staff=CustomUser.objects.get(id=staff_id)
+
+        try:
+            subject=Subjects(subject_name=subject_name,course_id=course,staff_id=staff)
+            subject.save()
+            messages.success(request,"Successfully Added Subject")
+            return HttpResponseRedirect(reverse("add_subject"))
+        except:
+            messages.error(request,"Failed to Add Subject")
+            return HttpResponseRedirect(reverse("add_subject"))
+
