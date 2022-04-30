@@ -85,20 +85,4 @@ class passwordChangeSerializer(serializers.Serializer):
 
 
 
-# class SessionYearModalSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model=SessionYearModel
-#         fields='__all__'
 
-
-# class CoursesSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model=Courses
-#         fields='__all__'
-
-# class ProfileSerializer(serializers.ModelSerializer):
-#     # course_id=CoursesSerializer(many=False,read_only=True)
-#     # session_year_id=SessionYearModalSerializer(many=False,read_only=True)
-#     class Meta:
-#         model = Profile
-#         fields = '__all__'

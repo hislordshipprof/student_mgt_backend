@@ -20,6 +20,11 @@ class StudentsSerializer(serializers.ModelSerializer):
         model =Students
         fields='__all__'
 
+class SubjectsSerializer(serializers.ModelSerializer):
+    course_id=CoursesSerializer(many=False,read_only=True)
+    class Meta:
+        model=Subjects
+        fields='__all__'
 
 class AdminHodSerializer(serializers.ModelSerializer):
      class Meta:
@@ -31,11 +36,7 @@ class StaffsSerializer(serializers.ModelSerializer):
         model=Staffs
         fields='__all__'
 
-class SubjectsSerializer(serializers.ModelSerializer):
-    course_id=CoursesSerializer()
-    class Meta:
-        model=Subjects
-        fields='__all__'
+
 
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:

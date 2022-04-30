@@ -110,7 +110,7 @@ def staff_registration(request):
             account.is_staff = True
             account.save()
             staff = Staffs (
-            
+                
                 address = request.data.get("address"),
                 created_at=request.data.get("created_at"),
                 updated_at=request.data.get("updated_at"),

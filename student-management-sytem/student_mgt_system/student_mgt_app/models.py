@@ -3,8 +3,11 @@ from re import T
 from django.conf import settings
 # from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.forms import model_to_dict
+
 from Accounts.models import User
 from rest_framework.authtoken.models import Token
+from utils.utils import serialize
 # Create your models here.
 class SessionYearModel(models.Model):
     id=models.AutoField(primary_key=True)
@@ -21,11 +24,13 @@ class AdminHOD(models.Model):
     objects=models.Manager()
 
     def __str__(self):
-        return self.user
+        return self.user.username
 
 class Staffs(models.Model):
     id=models.AutoField(primary_key=True)
     user=models.OneToOneField(User,on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=50,blank=True, null=True)
+    last_name = models.CharField(max_length=50,blank=True, null=True)
     address=models.TextField(null=True,blank=True,)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now_add=True)
@@ -33,19 +38,37 @@ class Staffs(models.Model):
     objects=models.Manager()
 
     def __str__(self):
-        return self.user
-
-
+        return self.user.username
+    def to_json(self):
+        data={'id':self.id,**model_to_dict(self), 
+        "subject_id":serialize(Subjects.objects.filter(staff_id=self.user.id)),
+        "staff_atte_present_list":Attendance.objects.filter(subject_id=self.id).count(),
+        "staff_absent_list":LeaveReportStaff.objects.filter(staff_id=self.id).count(),
+        
+        # "staff_name_list":Staffs.object.filter(user=self.user.User)
+       
+        }
+         
+        return data
+   
 
 class Courses(models.Model):
     id=models.AutoField(primary_key=True)
     course_name=models.CharField(max_length=255)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now_add=True)
-    objects=models.Manager()
-
+    # objects=models.Manager()
     def __str__(self):
         return self.course_name
+
+
+    def to_json(self):
+        return {"id":self.id, **model_to_dict(self),
+        "subjects_in_course_count":Subjects.objects.filter(course_id=self.id).count(),
+        "students_with_course_count":Students.objects.filter(course_id=self.id).count(),
+        
+        }
+        
 
 
 class Subjects(models.Model):
@@ -59,6 +82,14 @@ class Subjects(models.Model):
 
     def __str__(self):
         return self.subject_name
+
+    def to_json(self):
+        data={'id':self.id,**model_to_dict(self), 
+        "courses":serialize(Courses.objects.filter(id=self.course_id.id)),
+
+        }
+        
+        return data
 
 class Students(models.Model):
     id=models.AutoField(primary_key=True)
@@ -78,6 +109,20 @@ class Students(models.Model):
     def __str__(self):
         return self.user.username
 
+    def to_json(self):
+        data= {"id":self.id, **model_to_dict(self,exclude=['profile_pic']),
+        # "subjects":serialize(Subjects.objects.filter(course_id=self))
+        "course_of_student":serialize(Courses.objects.filter(id=self.course_id.id)),
+        
+      "attendance_present_list":AttendanceReport.objects.filter(student_id=self.id,status=True).count(),
+      "absent_list":AttendanceReport.objects.filter(student_id=self.id,status=False).count(),
+      "leaves":LeaveReportStudent.objects.filter(student_id=self.id,).count(),
+     
+        }
+        data['profile_pic'] = self.profile_pic.url if self.profile_pic else ""
+        return data
+    
+
 class Attendance(models.Model):
     id=models.AutoField(primary_key=True)
     subject_id=models.ForeignKey(Subjects,on_delete=models.DO_NOTHING)
@@ -86,6 +131,13 @@ class Attendance(models.Model):
     session_year_id=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE)
     updated_at=models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
+    
+    def to_json(self):
+        data={'id':self.id,**model_to_dict(self), 
+      
+        }
+        
+        return data
 
 class AttendanceReport(models.Model):
     id=models.AutoField(primary_key=True)
@@ -96,6 +148,13 @@ class AttendanceReport(models.Model):
     updated_at=models.DateTimeField(auto_now_add=True)
     objects=models.Manager()
 
+    def to_json(self):
+        data={'id':self.id,**model_to_dict(self), 
+      
+        }
+        
+        return data
+
 class LeaveReportStudent(models.Model):
     id=models.AutoField(primary_key=True)
     student_id=models.ForeignKey(Students,on_delete=models.CASCADE)
@@ -105,6 +164,13 @@ class LeaveReportStudent(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now_add=True)
     objects=models.Manager()
+
+    def to_json(self):
+        data={'id':self.id,**model_to_dict(self), 
+    
+        }
+        
+        return data
 
 class LeaveReportStaff(models.Model):
     id = models.AutoField(primary_key=True)
