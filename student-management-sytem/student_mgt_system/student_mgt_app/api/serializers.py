@@ -20,6 +20,7 @@ class StudentsSerializer(serializers.ModelSerializer):
         model =Students
         fields='__all__'
 
+
 class SubjectsSerializer(serializers.ModelSerializer):
     course_id=CoursesSerializer(many=False,read_only=True)
     class Meta:

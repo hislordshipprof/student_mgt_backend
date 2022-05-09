@@ -6,28 +6,54 @@ import './ProgramStyle.scss'
 
 
 const AddCourse = () => {
-  const [values,setValues]=useState({
-    coursename:"",
-  
+  const baseUrl = "/api/add_course_save/";
+ 
+  const [values,setValues]=useState('');
 
-  })
+   const addCourse = () => {
+
+     fetch(baseUrl, {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify(values),
+     })
+       .then((response) => response.json())
+       //Then with the data from the response in JSON...
+       .then((data) => {
+         console.log("Success:", data);
+         setValues(data);
+       })
+
+       //Then with the error genereted...
+       .catch((error) => {
+         console.error("Error:", error);
+       });
+   };
+
 
   const inputs = [
     {
       id: 1,
-      name: "Course Name",
+      name: "course_name",
       type: "text",
       placeholder: "Enter Course",
       label: "Course Name",
     },
 ]
+
+
+
 const onChange = (e) => {
   setValues({ ...values, [e.target.name]: e.target.value });
 };
 const handleSubmit = (e) => {
   e.preventDefault();
+  addCourse()
+  console.log("data passed succesfully")
+  // setValues('')
 };
-
 
   return (
     <div className="program">
@@ -46,7 +72,7 @@ const handleSubmit = (e) => {
               />
             ))}
 
-            <button>Add Course</button>
+            <button type='submit'>Add Course</button>
           </form>
         </div>
       </div>

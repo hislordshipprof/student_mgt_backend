@@ -1,17 +1,39 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import './Widget.scss'
 import PieChartIcon from "@mui/icons-material/PieChart";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+// import axios from 'axios'
+
+
 const Widget = ({type}) => {
+  const baseUrl = "http://127.0.0.1:8000/api/admin_home/";
+  const [mydata,setMyData]=useState([])
+
+  const getData=()=>{
+    fetch(baseUrl)
+    .then((response) => response.json())
+    .then((mydata)=>{
+      console.log('m=------dada',mydata)
+      setMyData(mydata)
+      
+    }) 
+     
+      
+    };
+  
+  useEffect(() => {
+   getData()
+  }, []);
+console.log('=======mydata=========',mydata)
   let data;
 
     switch (type) {
       case "Student":
         data = {
-          counter:"1",
+          counter:mydata?.student_count1,
           title: "Total Student",
           link: "Student Info",
           icon: <PersonOutlineIcon className="personicon" style={{color:"crimson", backgroundColor:"#0400ff33",
@@ -21,7 +43,7 @@ const Widget = ({type}) => {
 
       case "Staff":
         data = {
-          counter: "2",
+          counter: mydata?.staff_count,
           title: "Total Staffs",
           link: "Staff Info",
           icon: (
@@ -34,7 +56,7 @@ const Widget = ({type}) => {
         break;
       case "Course":
         data = {
-          counter: "3",
+          counter: mydata?.course_count,
           title: "Total Course",
           link: "Course Info",
           icon: (
@@ -47,11 +69,15 @@ const Widget = ({type}) => {
         break;
       case "Subject":
         data = {
-          counter:"4",
+          counter: mydata?.subject_count,
           title: "Total Subject",
           link: "Subject Info",
-          icon: <MenuBookIcon className="personicon" style={{color:"green", backgroundColor:"rgba(0,128,0,0.2)",
-        }}/>,
+          icon: (
+            <MenuBookIcon
+              className="personicon"
+              style={{ color: "green", backgroundColor: "rgba(0,128,0,0.2)" }}
+            />
+          ),
         };
         break;
       default:

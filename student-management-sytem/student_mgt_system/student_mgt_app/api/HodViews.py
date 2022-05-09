@@ -54,6 +54,7 @@ def add_staff_save(request):
         serializer = user_creation_serializer(data=request.data)
         data = {}
         if serializer.is_valid():
+            print('ffeddd')
             account = serializer.save()
             account.is_staff = True
             account.save()
@@ -90,6 +91,7 @@ def add_course_save(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.data)
 
+
 @api_view(['POST'])
 def add_student_save(request):
     if request.method == "POST":
@@ -121,23 +123,27 @@ def add_student_save(request):
             data = serializer.errors
         return Response(data)
 
+
+@api_view(['GET'])
+def add_subject(request):
+    courses=CoursesSerializer( Courses.objects.all(), many=True)
+    staffs=StaffsSerializer(Staffs.objects.all(),many=True)
+    return Response({"courses":courses.data,"staffs":staffs.data})
+
 @api_view(['POST'])
 def add_subject_save(request):
-    if request.method!="POST":
-        return HttpResponse("<h2>Method Not Allowed</h2>")
-    else:
-        subject_name=request.POST.get("subject_name")
-        course_id=request.POST.get("course")
-        course=Courses.objects.get(id=course_id)
-        staff_id=request.POST.get("staff")
-        staff=CustomUser.objects.get(id=staff_id)
+    if request.method == 'POST':
+        subject=Subjects(
+            subject_name=request.data.get("subject_name"),
+            course_id=request.data.get("course_id"),
+        
+            staff_id=request.data.get("staff_id"),
+            # staff=Staffs.objects.get(id=request.data.get("staff")),
 
-        try:
-            subject=Subjects(subject_name=subject_name,course_id=course,staff_id=staff)
-            subject.save()
-            messages.success(request,"Successfully Added Subject")
-            return HttpResponseRedirect(reverse("add_subject"))
-        except:
-            messages.error(request,"Failed to Add Subject")
-            return HttpResponseRedirect(reverse("add_subject"))
-
+        )
+        serializer = SubjectsSerializer(subject,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.data)
