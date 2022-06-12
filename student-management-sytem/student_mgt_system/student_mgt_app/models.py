@@ -44,9 +44,7 @@ class Staffs(models.Model):
         "subject_id":serialize(Subjects.objects.filter(staff_id=self.user.id)),
         "staff_atte_present_list":Attendance.objects.filter(subject_id=self.id).count(),
         "staff_absent_list":LeaveReportStaff.objects.filter(staff_id=self.id).count(),
-        
-        # "staff_name_list":Staffs.object.filter(user=self.user.User)
-       
+        # "staff_name_list":User.objects.filter(user=self.id)
         }
          
         return data
@@ -73,9 +71,9 @@ class Courses(models.Model):
 
 class Subjects(models.Model):
     id=models.AutoField(primary_key=True)
-    subject_name=models.CharField(max_length=255)
-    course_id=models.ForeignKey(Courses,on_delete=models.CASCADE,default=1)
-    staff_id=models.ForeignKey(User,on_delete=models.CASCADE)
+    subject_name=models.CharField(max_length=255,null=True,blank=True)
+    course_id=models.ForeignKey(Courses,on_delete=models.CASCADE,default=1,blank=True, null=True)
+    staff_id=models.ForeignKey(User,on_delete=models.CASCADE,blank=True, null=True)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now_add=True)
     objects=models.Manager()
@@ -85,8 +83,7 @@ class Subjects(models.Model):
 
     def to_json(self):
         data={'id':self.id,**model_to_dict(self), 
-        "courses":serialize(Courses.objects.filter(id=self.course_id.id)),
-
+        # "courses":serialize(Courses.objects.filter(id=self.course_id.id)),
         }
         
         return data
@@ -111,7 +108,7 @@ class Students(models.Model):
 
     def to_json(self):
         data= {"id":self.id, **model_to_dict(self,exclude=['profile_pic']),
-        # "subjects":serialize(Subjects.objects.filter(course_id=self))
+        
         "course_of_student":serialize(Courses.objects.filter(id=self.course_id.id)),
         
       "attendance_present_list":AttendanceReport.objects.filter(student_id=self.id,status=True).count(),

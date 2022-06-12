@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import FormInput from "../../components/Form/FormInput";
 import Navbar from "../../components/Navbar/Navbar";
 import Sidebar from "../../components/Sidebar/Sidebar";
@@ -6,6 +6,10 @@ import "./AddStudent.scss";
 
 const AddStudent = () => {
    const baseUrl = "/api/add_student_save/";
+
+   const baseUrl2 = "http://127.0.0.1:8000/api/manage_course/";
+  const[mydata,setMydata]=useState([
+  ]) 
   const [values, setValues] = useState({
     username: "",
     email: "",
@@ -14,11 +18,24 @@ const AddStudent = () => {
     password: "",
     password2:"",
     address: "",
-    course_id:"",
+    // course_id:"",
     gender:"",
     profile_pic:"",
   });
-
+ 
+ useEffect(() => {
+  
+   fetch(baseUrl2)
+     .then((response) => response.json())
+     .then((mydata) => {
+       console.log(mydata);
+       console.log("m=------dada", mydata);
+       setMydata(mydata);
+     });
+  
+ }, []); 
+   
+  
 
    const addStudent = () => {
      fetch(baseUrl, {
@@ -51,8 +68,7 @@ const AddStudent = () => {
       required: true,
       errorMessage:
         "Username should be 3-16 characters and shouldnt include any special character!",
-  
-      
+     oder1:'order1'
     },
     {
       id: 2,
@@ -62,7 +78,7 @@ const AddStudent = () => {
       label: "Email:",
       errorMessage: "It should be a valid email address!",
       required: true,
-      // order1: "order1",
+     
     },
     {
       id: 3,
@@ -74,7 +90,7 @@ const AddStudent = () => {
         "Password should be 8-20 characters and include at least 1 letter,1 number and 1 special character@##!",
       pattern: `^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$`,
       required: true,
-      // order1: "order1",
+     
     },
     {
       id: 4,
@@ -86,7 +102,7 @@ const AddStudent = () => {
         "Password should be 8-20 characters and include at least 1 letter,1 number and 1 special character@##!",
       pattern: `^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$`,
       required: true,
-      // order1: "order1",
+     
     },
     {
       id: 5,
@@ -94,7 +110,7 @@ const AddStudent = () => {
       type: "text",
       placeholder: "First Name",
       label: "First Nmae:",
-      // order1: "order1",
+      
     },
 
     {
@@ -103,7 +119,7 @@ const AddStudent = () => {
       type: "text",
       placeholder: "Last Name",
       label: "Last Name:",
-      // order1: "order1",
+      
     },
 
     {
@@ -112,7 +128,7 @@ const AddStudent = () => {
       type: "text",
       placeholder: "Address",
       label: "Address:",
-      // order1: "order1",
+      
     },
     {
       id: 8,
@@ -120,15 +136,16 @@ const AddStudent = () => {
       type: "text",
       placeholder: "choice",
       label: "Course:",
-      // order2: "order2",
+      
     },
+  
     {
       id: 9,
       name: "session year",
       type: "date",
       placeholder: "",
       label: "Session Year",
-      // order1: "order1",
+      
     },
 
     {
@@ -137,7 +154,7 @@ const AddStudent = () => {
       type: "text",
       placeholder: "male",
       label: "Sex",
-      // order1: "order1",
+     
     },
 
     {
@@ -146,18 +163,23 @@ const AddStudent = () => {
       type: "file",
       placeholder: "",
       label: "Profile Pic",
-      // order1: "order1",
+      
     },
   ];
 
+  
   const onChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
+    
   };
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
     addStudent()
 
   };
+  console.log("first", mydata?.courses);
   return (
     <div className="studentlist">
       <Sidebar />
@@ -168,18 +190,25 @@ const AddStudent = () => {
         <div className="Formfield">
           <form onSubmit={handleSubmit}>
             <h1>Add Student</h1>
-            { inputs.map((input) => (
+            {inputs.map((input) => (
               <FormInput
                 key={input.id}
                 {...input}
                 value={values[input.name]}
                 onChange={onChange}
-                type='text'
-                orde1="order1"
-                order2="order2"
+                
+                
               />
             ))}
-
+           
+            <select >
+            
+              {mydata?.courses?.map((course) => (
+               
+            <option value={course.id} key={course.id} onChange={(e) => setMydata(e.target.value)}>{course.course_name} </option>       
+              ))}
+            </select>
+                  
             <button type="submit">Add Student</button>
           </form>
         </div>

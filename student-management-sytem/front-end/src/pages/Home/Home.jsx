@@ -9,7 +9,10 @@ import "./home.scss"
 const Home = () => {
   return (
     <div className="home">
-      <Sidebar />
+      
+        <Sidebar />
+     
+
       <div className="home_container">
         <Navbar />
         <div className="widgets">
@@ -27,14 +30,11 @@ const Home = () => {
           <StudentStaff type="student-subject" chart="pie" color4="color4" />
         </div>
         <div className="student_card1">
-          <BarChart option="student-attendance"  color1="color1" />
-
+          <BarChart option="student-attendance" color1="color1" />
         </div>
         <div className="student_card1">
-          <BarChart option="staff-attendance"  color3="color3" />
-         
+          <BarChart option="staff-attendance" color3="color3" />
         </div>
-    
       </div>
     </div>
   );

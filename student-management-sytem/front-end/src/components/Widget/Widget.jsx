@@ -15,9 +15,9 @@ const Widget = ({type}) => {
   const getData=()=>{
     fetch(baseUrl)
     .then((response) => response.json())
-    .then((mydata)=>{
-      console.log('m=------dada',mydata)
-      setMyData(mydata)
+    .then((mydatas)=>{
+      console.log('m=dadas',mydatas)
+      setMyData(mydatas)
       
     }) 
      

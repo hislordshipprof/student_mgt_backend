@@ -4,6 +4,8 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import Tables from '../../components/Table/Tables';
 import './ManageStaff.scss'
 const ManageStaff = () => {
+ 
+    
   return (
     <div className="managelist">
       <Sidebar />
@@ -19,5 +21,6 @@ const ManageStaff = () => {
     </div>
   );
 }
+
 
 export default ManageStaff
